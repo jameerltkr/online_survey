@@ -1,5 +1,5 @@
 ﻿//main controller
-main.controller("MainController", function ($scope) {
+main.controller("MainController", function ($scope, $location) {
     $scope.ABC = "ABC";
     $scope.phones = [
     {'name': 'Nexus S',
@@ -9,4 +9,11 @@ main.controller("MainController", function ($scope) {
     {'name': 'MOTOROLA XOOM™',
      'snippet': 'The Next, Next Generation tablet.'}
   ];
+  
+  $scope.redirect = function(){
+  	console.log('hi');
+  	$location.path('/SurveyForm');
+  	
+  }
+    
 });

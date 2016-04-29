@@ -4,7 +4,7 @@ main.controller("AuthController", function ($scope, $http, $rootScope, $location
 	$scope.error_message = '';
     //login call to webapi (node implemented service)
     $scope.login = function(){
-    console.log('Fucked bad');
+    console.log('');
 		$http.post('/auth/login', $scope.user).success(function(data){
 			if(data.state == 'success'){
 				$rootScope.authenticated = true;
@@ -21,7 +21,7 @@ main.controller("AuthController", function ($scope, $http, $rootScope, $location
 	};
   //login call to webapi (node implemented service)
 	$scope.register = function(){
-	console.log('Fucked bad');
+	console.log('');
 		console.log($scope.user);
 		$http.post('/auth/signup', $scope.user).success(function(data){
 			if(data.state == 'success'){
@@ -34,9 +34,5 @@ main.controller("AuthController", function ($scope, $http, $rootScope, $location
 			}
 		});
 	};
-	$scope.redirect = function(){
-	console.log('Fucked bad');
-	$location.path('/SurveyForm');
-  		
-	};
+	
 });
