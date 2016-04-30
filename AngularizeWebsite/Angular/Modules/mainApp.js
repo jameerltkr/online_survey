@@ -58,6 +58,18 @@ main.config([
                 caseInsensitiveMatch: true,
                 controller: 'MainController'
             })
+			.state('CreateSurvey', {
+                url: '/CreateSurvey',
+                templateUrl: 'CreateSurvey.html',
+                caseInsensitiveMatch: true,
+                controller: 'MainController'
+            })
+			.state('AllSurvey', {
+                url: '/AllSurvey',
+                templateUrl: 'AllSurvey.html',
+                caseInsensitiveMatch: true,
+                controller: 'MainController'
+            })
             // .state('contact', {
 //                 url: '/contact',
 //                 templateUrl: 'Contact.html',

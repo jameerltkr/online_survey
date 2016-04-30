@@ -36,6 +36,10 @@
                     <li><a href="#/about">About</a></li>
                     <li><a href="#/contact">Contact</a></li>
                 </ul>-->
+                <ul class="nav navbar-nav" ng-show="authenticated">
+                    <li><a href="#/AllSurvey">All Survey</a></li>
+                    <li><a href="#/CreateSurvey">Create Survey</a></li>
+                </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><p class="navbar-right navbar-text">{{current_user}}</p></li>
                     <li><p class="navbar-right navbar-text" ng-hide="authenticated">

@@ -9,8 +9,10 @@ main.controller("AuthController", function ($scope, $http, $rootScope, $location
 			if(data.state == 'success'){
 				$rootScope.authenticated = true;
 				$rootScope.current_user = data.user.username;
+				$rootScope.userid = data.user._id;
 				$rootScope.sess = data.user;
 				sessionStorage.setItem('current_user', $rootScope.sess.username);
+				sessionStorage.setItem('userid', $rootScope.userid);
 				$location.path('/HomePage');
 			}
 			else{
@@ -27,6 +29,7 @@ main.controller("AuthController", function ($scope, $http, $rootScope, $location
 			if(data.state == 'success'){
 				$rootScope.authenticated = true;
 				$rootScope.current_user = data.user.username;
+				$rootScope.userid = data.user._id;
 				$location.path('/');
 			}
 			else{
