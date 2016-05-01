@@ -1,5 +1,5 @@
 ﻿//main controller
-main.controller("MainController", function ($scope, $location, $http) {
+main.controller("MainController", function ($scope, $location, $http, $rootScope, $window) {
     var survey_name = '';
     var survey_ques = [];
     var ques_options = [];
@@ -24,6 +24,8 @@ main.controller("MainController", function ($scope, $location, $http) {
         'snippet': 'The Next, Next Generation tablet.'
     }
     ];
+
+    if (!$scope.authenticated) return;      // Return from here if not authenticated
 
     $scope.redirect = function () {
         console.log('hi');
@@ -116,11 +118,16 @@ main.controller("MainController", function ($scope, $location, $http) {
         var dd = $http.post("/CreateSurvey", param);
 
         dd.then(function (data) {
-            alert(data);
+            alert('Records saved in db.');
         }, function (err) {
             //$scope.pages = page.data.data[0].page_data;
             alert('Error while saving records in database');
         });
+
+        survey_name = '';
+        survey_ques = [];
+        ques_options = [];
+        ques_id = 0;
     };
 
     // View Surveys
@@ -135,15 +142,157 @@ main.controller("MainController", function ($scope, $location, $http) {
     });
 
 
-    $scope.viewSurvey = function () {
+    $scope.viewSurvey = function (survey_id) {
+        var survey = $http.get("/ViewSurvey/" + survey_id);
 
+        survey.then(function (data) {
+            $rootScope.viewsurvey = data.data;
+            $location.path('/ViewSurvey');
+        }, function (err) {
+            //$scope.pages = page.data.data[0].page_data;
+            alert('Error while saving records in database');
+        });
     };
 
-    $scope.editSurvey = function () {
+    $scope.editSurvey = function (survey_id) {
+        var survey = $http.get("/ViewSurvey/" + survey_id);
 
+        survey.then(function (data) {
+            $rootScope.viewsurvey = data.data;
+            $location.path('/EditSurvey');
+        }, function (err) {
+            //$scope.pages = page.data.data[0].page_data;
+            alert('Error while saving records in database');
+        });
     };
 
-    $scope.deleteSurvey = function () {
+    $scope.deleteSurvey = function (survey_id) {
+        var param = JSON.stringify({
+            survey_id: survey_id
+        });
 
+        var deleteSurvey = $window.confirm('Are you absolutely sure you want to delete?');
+
+        if (deleteSurvey) {
+            var dd = $http.post("/DeleteSurvey", param);
+
+            dd.then(function (data) {
+                $window.location.reload();
+                alert('Survey deleted from db.');
+            }, function (err) {
+                //$scope.pages = page.data.data[0].page_data;
+                alert('Error while saving records in database');
+            });
+        }
+    };
+
+    $scope.generateSurveyUrl = function (survey_id) {
+        $scope.surveyUrl = true;
+
+        var protocol = $location.protocol();
+        var host = $location.host();
+
+        if ($location.port())
+            var combined = protocol + '://' + host + ":" + $location.port() + "/#/TakeSurvey?id=" + survey_id;
+        else
+            var combined = protocol + '://' + host + "/#/TakeSurvey?id=" + survey_id;
+
+        $("#surveyUrl").attr("href", combined);
+        $("#surveyUrl").text(combined);
+    };
+
+    $scope.location = $location;
+    $scope.$watch('location.search()', function () {
+        var survey_id = ($location.search()).id;
+
+        if (survey_id != undefined) {
+            var survey = $http.get("/ViewSurvey/" + survey_id);
+
+            survey.then(function (data) {
+                $rootScope.viewsurvey = data.data;
+                // $location.path('/TakeSurvey');
+            }, function (err) {
+                $rootScope.viewsurvey = null;
+                //$scope.pages = page.data.data[0].page_data;
+                alert('Error while saving records in database');
+            });
+        }
+    }, true);
+
+    $scope.surveySubmit = function () {
+        var ans_data = [];
+        var survey_name = $scope.survey_name;
+
+        $("input[type='radio']").each(function (i, obj) {
+            if (obj.checked) {
+                console.log('dd');
+
+                ans_data.push({
+                    ques_id: $(obj).attr('value'),
+                    ques_text: $(obj).attr('data-val')
+                });
+            }
+        });
+
+        var param = JSON.stringify({
+            data: ans_data,
+            user_id: sessionStorage.getItem('userid')
+        });
+
+        var dd = $http.post("/save-answers", param);
+
+        dd.then(function (data) {
+            alert('Records saved in db.');
+        }, function (err) {
+            //$scope.pages = page.data.data[0].page_data;
+            alert('Error while saving records in database');
+        });
+    };
+
+    $scope.backEditedSurvey = function () {
+        $location.path('/AllSurvey');
+    };
+
+    $scope.saveEditedSurvey = function () {
+        console.log('dd');
+        $("[data-ques-id]").each(function (i, obj) {
+            var ques_id = $(obj).attr('data-ques-id');
+            var ques_text = $(obj).val();
+
+            var param = JSON.stringify({
+                ques_id: ques_id,
+                ques_text: ques_text
+            });
+
+            var dd = $http.post("/EditQuestion", param);
+
+            dd.then(function (data) {
+                //alert('Records saved in db.');
+            }, function (err) {
+                //$scope.pages = page.data.data[0].page_data;
+                alert('Error while saving records in database');
+            });
+        });
+
+        $("[data-option-id]").each(function (i, obj) {
+            var id = $(obj).attr('data-option-id');
+            var text = $(obj).val();
+
+            var param = JSON.stringify({
+                id: id,
+                text: text
+            });
+
+            var dd = $http.post("/EditOption", param);
+
+            dd.then(function (data) {
+                //alert('Records saved in db.');
+            }, function (err) {
+                //$scope.pages = page.data.data[0].page_data;
+                alert('Error while saving records in database');
+            });
+        });
+
+        alert('Records updated');
     };
 });

@@ -66,6 +66,7 @@ router.post('/CreateSurvey', function (req, res) {
                 var collection = new survey.questions({
                     ques_number: data.ques_id,
                     ques_text: data.ques_text,
+                    match_id: data.ques_id,
                     survey_id: dd.survey_id
                 });
 
@@ -83,6 +84,7 @@ router.post('/CreateSurvey', function (req, res) {
                             // Saving records on local database//
                             var collection = new survey.ques_options({
                                 option_text: optiondata.option_text,
+                                match_id: optiondata.ques_id,
                                 ques_id: ddd._id
                             });
 
@@ -113,8 +115,167 @@ router.get('/AllSurvey/:userid', function (req, res) {
     }, function (err, data) {
         if (data) {
             res.send(data);
+        } else if (err) {
+            res.status(400).send('Error while getting records from db.');
         } else {
-            res.status(400).send('Error');
+            res.status(500).send('Data not found');
+        }
+    });
+});
+
+router.get('/ViewSurvey/:survey_id', function (req, res) {
+    var optionsd = [];
+    var cnt = 0;
+
+    survey.survey.findOne({
+        survey_id: req.param('survey_id')
+    }, function (err, data) {
+        if (data) {
+            //res.send(data);
+            survey.questions.find({
+                survey_id: data.survey_id
+            }, function (err, quesdata) {
+                if (quesdata) {
+
+                    quesdata.forEach(function (qd) {
+                        survey.ques_options.find({
+                            ques_id: qd._id
+                        }, function (err, optionsdata) {
+                            if (optionsdata) {
+                                console.log('Send all the survey data');
+                                //res.send({
+                                //    survey_name: data.survey_name,
+                                //    questions: quesdata,
+                                //    options: optionsdata
+                                //});
+
+                                //         console.log('optionsdata.option_text::' + optionsdata);
+
+                                optionsd.push(optionsdata);
+
+                                if (cnt == quesdata.length - 1) {
+                                    console.log('Now both are same');
+
+                                    res.send({
+                                        survey_name: data.survey_name,
+                                        questions: quesdata,
+                                        options: optionsd
+                                    });
+                                }
+
+                                cnt++;
+                            } else if (err) {
+                                res.status(400).send('Error while getting records from db.');
+                            } else {
+                                res.status(500).send('Data not found');
+                            }
+                        });
+                    });
+
+                } else if (err) {
+                    res.status(400).send('Error while getting records from db.');
+                } else {
+                    res.status(500).send('Data not found');
+                }
+            });
+        } else if (err) {
+            res.status(400).send('Error while getting records from db.');
+        } else {
+            res.status(500).send('Data not found');
+        }
+    });
+
+    //res.end();
+});
+
+router.post('/save-answers', function (req, res) {
+    var user_id = req.body.user_id;
+    var data = req.body.data;
+    var cnt = 0;
+
+    data.forEach(function (dd) {
+        var ques_id = dd.ques_id;
+        var ques_text = dd.ques_text;
+
+        // Saving records on local database//
+        var collection = new survey.ans_ques({
+            user_id: user_id,
+            ques_id: ques_id,
+            ans_text: ques_text
+        });
+
+        collection.save(function (err) {
+            if (err) {
+                console.log('Database Error: ' + err);
+                res.status(500).send({ error: 'Database Error - ' + err });
+            } else {
+                console.log('Records saved successfully in database');
+                //res.send('Records saved successfully in database');
+
+                if (cnt == data.length - 1) {
+                    res.send('Records saved successfully in database');
+                }
+                cnt++;
+            }
+        });
+    });
+
+});
+
+router.post('/DeleteSurvey', function (req, res) {
+    survey.survey.remove({
+        survey_id: req.body.survey_id
+    }, function (err) {
+        if (err) {
+            res.status(400).send('Error while getting records from db.');
+        } else {
+            res.send('Record deleted');
+        }
+    });
+});
+
+router.post('/EditQuestion', function (req, res) {
+    var ques_id = req.body.ques_id;
+    var ques_text = req.body.ques_text;
+
+    survey.questions.findOne({
+        _id: ques_id
+    }, function (err, data) {
+        if (err) {
+            res.status(400).send('Error while updating records in db.');
+        } else if (data) {
+            data.ques_text = ques_text;
+            data.save(function (err) {
+                if (!err)
+                    res.send('Record updated');
+                else
+                    res.status(500).send('Error while updating records in db.');
+            });
+        } else {
+            res.status(500).send('Error while updating records in db.');
+        }
+    });
+});
+
+router.post('/EditOption', function (req, res) {
+    var id = req.body.id;
+    var text = req.body.text;
+
+    survey.ques_options.findOne({
+        _id: id
+    }, function (err, data) {
+        if (err) {
+            res.status(400).send('Error while updating records in db.');
+        } else if (data) {
+            data.option_text = text;
+            data.save(function (err) {
+                if (!err)
+                    res.send('Record updated');
+                else
+                    res.status(500).send('Error while updating records in db.');
+            });
+        } else {
+            res.status(500).send('Error while updating records in db.');
         }
     });
 });
@@ -124,8 +285,8 @@ module.exports = router;
 function getRandomString() {
     //return Math.random().toString(36).substring(7);
     var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    for (var i = 0; i < 6; i++) {
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstvwxyz";
+    for (var i = 0; i < 12; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return text;

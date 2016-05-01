@@ -11,17 +11,22 @@ var question_schema = mongoose.Schema({
     ques_number: String,
     ques_text: String,
     survey_id: String,
+    match_id: String,
     no_of_textboxes: Number,
     no_of_radio_buttons: Number
 });
 
 var ques_options_schema = mongoose.Schema({
     ques_id: String,
+    match_id: String,
     option_text: String
 });
 
 var ans_ques_schema = mongoose.Schema({
+    user_id: String,
+    survey_name: String,
     ques_id: String,
+    match_id: String,
     ans_text: String
 });
 

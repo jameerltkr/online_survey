@@ -1,25 +1,33 @@
-<div class="row">
-    <div class="col col-md-4">
-        Survey Name
+<div ng-show="authenticated">
+    <div class="row">
+        <div class="col col-md-4">
+            Survey Name
+        </div>
+        <div class="col col-md-4">
+            Created On
+        </div>
+        <div class="col col-md-4">
+            Action
+        </div>
     </div>
-    <div class="col col-md-4">
-        Created On
+    <div class="row" ng-repeat="data in survey">
+        <input type="hidden" value="{{data.survey_id}}" name="survey_id" ng-model="survey_id" />
+        <div class="col col-md-4">
+            {{data.survey_name}}
+        </div>
+        <div class="col col-md-4">
+            {{data.created_on}}
+        </div>
+        <div class="col col-md-4">
+            <input type="button" value="View" ng-click="viewSurvey(data.survey_id)" />
+            <input type="button" value="Edit" ng-click="editSurvey(data.survey_id)" />
+            <input type="button" value="Delete" ng-click="deleteSurvey(data.survey_id)" />
+            <input type="button" value="Generate Survey Url" ng-click="generateSurveyUrl(data.survey_id)" />
+        </div>
     </div>
-    <div class="col col-md-4">
-        Action
-    </div>
-</div>
-<div class="row" ng-repeat="data in survey">
-    <input type="hidden" value="data.survey_id" name="survey_id"/>
-    <div class="col col-md-4">
-        {{data.survey_name}}
-    </div>
-    <div class="col col-md-4">
-        {{data.created_on}}
-    </div>
-    <div class="col col-md-4">
-        <input type="button" value="View" ng-click="viewSurvey()"/>
-        <input type="button" value="Edit" ng-click="editSurvey()"/>
-        <input type="button" value="Delete" ng-click="deleteSurvey()"/>
+    <br />
+    <div ng-show="surveyUrl">
+        <h4>Survey URL</h4>
+        <a id="surveyUrl" target="_blank"></a>
     </div>
 </div>
